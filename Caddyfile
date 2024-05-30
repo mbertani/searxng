@@ -1,99 +1,104 @@
 {
-  admin off
+	admin off
 }
 
-{$SEARXNG_HOSTNAME} {
-  log {
-        output discard
-  }
+# defines the SSL cert/key files as a snippet to be reused.
+(ssl_certs) {
+	tls "/data/certs/local.cert.pem" "/data/certs/local.key.pem"
+}
 
-  tls {$SEARXNG_TLS}
+localhost {
+	import ssl_certs
+	#reverse_proxy searxng:8080
 
-  @api {
-        path /config
-        path /healthz
-        path /stats/errors
-        path /stats/checker
-  }
+	log {
+		output discard
+	}
 
-  @static {
-        path /static/*
-  }
+	@api {
+		path /config
+		path /healthz
+		path /stats/errors
+		path /stats/checker
+	}
 
-  @notstatic {
-        not path /static/*
-  }
+	@static {
+		path /static/*
+	}
 
-  @imageproxy {
-        path /image_proxy
-  }
+	@notstatic {
+		not path /static/*
+	}
 
-  @notimageproxy {
-        not path /image_proxy
-  }
+	@imageproxy {
+		path /image_proxy
+	}
 
-  header {
-        # Enable HTTP Strict Transport Security (HSTS) to force clients to always connect via HTTPS
-        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+	@notimageproxy {
+		not path /image_proxy
+	}
 
-        # Enable cross-site filter (XSS) and tell browser to block detected attacks
-        X-XSS-Protection "1; mode=block"
+	header {
+		# Enable HTTP Strict Transport Security (HSTS) to force clients to always connect via HTTPS
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
 
-        # Prevent some browsers from MIME-sniffing a response away from the declared Content-Type
-        X-Content-Type-Options "nosniff"
+		# Enable cross-site filter (XSS) and tell browser to block detected attacks
+		X-XSS-Protection "1; mode=block"
 
-        # Disable some features
-        Permissions-Policy "accelerometer=(),ambient-light-sensor=(),autoplay=(),camera=(),encrypted-media=(),focus-without-user-activation=(),geolocation=(),gyroscope=(),magnetometer=(),microphone=(),midi=(),payment=(),picture-in-picture=(),speaker=(),sync-xhr=(),usb=(),vr=()"
+		# Prevent some browsers from MIME-sniffing a response away from the declared Content-Type
+		X-Content-Type-Options "nosniff"
 
-        # Disable some features (legacy)
-        Feature-Policy "accelerometer 'none';ambient-light-sensor 'none'; autoplay 'none';camera 'none';encrypted-media 'none';focus-without-user-activation 'none'; geolocation 'none';gyroscope 'none';magnetometer 'none';microphone 'none';midi 'none';payment 'none';picture-in-picture 'none'; speaker 'none';sync-xhr 'none';usb 'none';vr 'none'"
+		# Disable some features
+		Permissions-Policy "accelerometer=(),ambient-light-sensor=(),autoplay=(),camera=(),encrypted-media=(),focus-without-user-activation=(),geolocation=(),gyroscope=(),magnetometer=(),microphone=(),midi=(),payment=(),picture-in-picture=(),speaker=(),sync-xhr=(),usb=(),vr=()"
 
-        # Referer
-        Referrer-Policy "no-referrer"
+		# Disable some features (legacy)
+		Feature-Policy "accelerometer 'none';ambient-light-sensor 'none'; autoplay 'none';camera 'none';encrypted-media 'none';focus-without-user-activation 'none'; geolocation 'none';gyroscope 'none';magnetometer 'none';microphone 'none';midi 'none';payment 'none';picture-in-picture 'none'; speaker 'none';sync-xhr 'none';usb 'none';vr 'none'"
 
-        # X-Robots-Tag
-        X-Robots-Tag "noindex, noarchive, nofollow"
+		# Referer
+		Referrer-Policy "no-referrer"
 
-        # Remove Server header
-        -Server
-  }
+		# X-Robots-Tag
+		X-Robots-Tag "noindex, noarchive, nofollow"
 
-  header @api {
-        Access-Control-Allow-Methods "GET, OPTIONS"
-        Access-Control-Allow-Origin  "*"
-  }
+		# Remove Server header
+		-Server
+	}
 
-  # Cache
-  header @static {
-        # Cache
-        Cache-Control "public, max-age=31536000"
-        defer
-  }
+	header @api {
+		Access-Control-Allow-Methods "GET, OPTIONS"
+		Access-Control-Allow-Origin "*"
+	}
 
-  header @notstatic {
-        # No Cache
-        Cache-Control "no-cache, no-store"
-        Pragma "no-cache"
-  }
+	# Cache
+	header @static {
+		# Cache
+		Cache-Control "public, max-age=31536000"
+		defer
+	}
 
-  # CSP (see http://content-security-policy.com/ )
-  header @imageproxy {
-        Content-Security-Policy "default-src 'none'; img-src 'self' data:"
-  }
+	header @notstatic {
+		# No Cache
+		Cache-Control "no-cache, no-store"
+		Pragma "no-cache"
+	}
 
-  header @notimageproxy {
-        Content-Security-Policy "upgrade-insecure-requests; default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; form-action 'self' https://github.com/searxng/searxng/issues/new; font-src 'self'; frame-ancestors 'self'; base-uri 'self'; connect-src 'self' https://overpass-api.de; img-src 'self' data: https://*.tile.openstreetmap.org; frame-src https://www.youtube-nocookie.com https://player.vimeo.com https://www.dailymotion.com https://www.deezer.com https://www.mixcloud.com https://w.soundcloud.com https://embed.spotify.com"
-  }
+	# CSP (see http://content-security-policy.com/ )
+	header @imageproxy {
+		Content-Security-Policy "default-src 'none'; img-src 'self' data:"
+	}
 
-  # SearXNG
-  handle {
-        encode zstd gzip
+	header @notimageproxy {
+		Content-Security-Policy "upgrade-insecure-requests; default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; form-action 'self' https://github.com/searxng/searxng/issues/new; font-src 'self'; frame-ancestors 'self'; base-uri 'self'; connect-src 'self' https://overpass-api.de; img-src 'self' data: https://*.tile.openstreetmap.org; frame-src https://www.youtube-nocookie.com https://player.vimeo.com https://www.dailymotion.com https://www.deezer.com https://www.mixcloud.com https://w.soundcloud.com https://embed.spotify.com"
+	}
 
-        reverse_proxy localhost:8080 {
-               header_up X-Forwarded-Port {http.request.port}
-               header_up X-Forwarded-Proto {http.request.scheme}
-               header_up X-Real-IP {remote_host}
-        }
-  }
+	#   # SearXNG
+	handle {
+		encode zstd gzip
 
+		reverse_proxy searxng:8080 {
+			header_up X-Forwarded-Port {http.request.port}
+			header_up X-Forwarded-Proto {http.request.scheme}
+			header_up X-Real-IP {remote_host}
+		}
+	}
 }

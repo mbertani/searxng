@@ -86,3 +86,11 @@ git pull
 docker-compose pull
 docker-compose up -d
 ```
+
+
+# Marco's setup
+
+1. Edit `sudo nano /private/etc/hosts` 
+2. Used [docker-caddy-reverse-proxy](https://github.com/josue/docker-caddy-reverse-proxy/blob/main/README.md) to get it right.
+3. Used the [actual answer](https://superuser.com/questions/7327/how-to-add-a-custom-search-engine-to-firefox) to add search to firefox. Then added a local engine [https://localhost/search?q=%s](https://localhost/search?q=%s)
+4. enjoy!

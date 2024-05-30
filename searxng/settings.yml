@@ -9,3 +9,13 @@ ui:
   static_use_hash: true
 redis:
   url: redis://redis:6379/0
+
+search:
+  safe_search: 1
+  autocomplete: "duckduckgo"
+  default_lang: "en"
+  ban_time_on_fail: 5
+  max_ban_time_on_fail: 120
+  formats:
+    - json
+    - html
