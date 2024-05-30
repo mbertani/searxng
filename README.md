@@ -90,7 +90,12 @@ docker-compose up -d
 
 # Marco's setup
 
-1. Edit `sudo nano /private/etc/hosts` 
+0. Make sure you have generated the key: `sed -i "s|ultrasecretkey|$(openssl rand -hex 32)|g" searxng/settings.yml`
+1. Edit `sudo nano /private/etc/hosts` if you are changing the domain.
 2. Used [docker-caddy-reverse-proxy](https://github.com/josue/docker-caddy-reverse-proxy/blob/main/README.md) to get it right.
+  
+   2.1 Run `sh ./install-ssl-certificates.sh` to generate the local certs.
+   2.2 Run `docker-compose up -d` to start the service
+
 3. Used the [actual answer](https://superuser.com/questions/7327/how-to-add-a-custom-search-engine-to-firefox) to add search to firefox. Then added a local engine [https://localhost/search?q=%s](https://localhost/search?q=%s)
 4. enjoy!
